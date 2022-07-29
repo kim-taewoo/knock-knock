@@ -1,25 +1,66 @@
+import { Participation } from '@prisma/client'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TimeSelectTable from 'src/components/TimeSelectTable'
 import { useUserContext } from 'src/context/UserContext'
+import { trpc } from 'src/utils/trpc'
+import { toast } from 'react-toastify'
 
 export default function Event() {
   const { status } = useSession()
   const { push, query } = useRouter()
-
+  const { data: eventData, isLoading, error } = trpc.useQuery(['events.single-event', { eventId: query.id as string }])
+  const utils = trpc.useContext()
+  const { mutate } = trpc.useMutation('events.my-cells', {
+    onSuccess() {
+      toast('저장 완료!', { autoClose: 2000 })
+    },
+    onError() {
+      toast('저장 실패...', { autoClose: 2000 })
+    },
+  })
   const user = useUserContext()
-  console.log(user)
+
+  const participates = eventData?.participates ?? []
+  const myParticipation: Participation | undefined = participates.find(
+    participate => participate.profileId === user?.id,
+  )
 
   const [selectedCells, setSelectedCells] = useState(new Set<string>())
   const [isResultView, setIsResultView] = useState<boolean>(false)
-  const [resultString, setResultString] = useState<string[]>([
-    '0033111222233330020110',
-    '0000111222233331100110',
-    '0111222233330000110000',
-    '0000111222200030000110',
-    '0000111222233330000110',
-  ])
+  const [resultCellCount, setResultCellCount] = useState<{ [key: string]: number }>({})
+
+  useEffect(() => {
+    const myCells = (myParticipation?.selectedCells ?? '').split(',')
+    setSelectedCells(new Set(myCells))
+
+    const counts = participates.reduce<{ [key: string]: number }>((accu, curr) => {
+      const selectedCells = (curr?.selectedCells ?? '').split(',')
+      selectedCells.forEach(cellId => {
+        if (accu[cellId]) {
+          accu[cellId] = accu[cellId]! + 1
+        } else {
+          accu[cellId] = 1
+        }
+      })
+      return accu
+    }, {})
+
+    setResultCellCount(counts)
+  }, [myParticipation])
+
+  function updateSelectedCells() {
+    if (!query.id || !user?.id) return
+    mutate({ eventId: query.id as string, profileId: user.id, cells: [...selectedCells].join(',') })
+  }
+
+  function deselectAll() {
+    setSelectedCells(new Set<string>([]))
+    if (!query.id || !user?.id) return
+    mutate({ eventId: query.id as string, profileId: user.id, cells: '' })
+  }
 
   function addOneCell(cellId: string) {
     setSelectedCells(prev => new Set([...prev, cellId]))
@@ -77,43 +118,50 @@ export default function Event() {
         </div>
       </div>
 
-      <div className="flex flex-col pt-9 h-screen relative">
-        <div className="flex justify-between px-5">
-          <div className="text-sm select-none">날짜 선택</div>
-          <span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </span>
+      <div className="flex flex-col pt-9 h-screen relative  bg-bgColor">
+        <div className="flex justify-between items-center ml-5">
+          <Link href="/">
+            <img src="/assets/svg/logo.svg" alt="logo" />
+          </Link>
         </div>
 
-        <div className="mt-7 h-2/3">
-          <TimeSelectTable
-            selectedIds={selectedCells}
-            onSelect={handleCellSelect}
-            isResultView={isResultView}
-            resultString={resultString}
-          />
+        <div className="mt-7 h-2/3 text-bgColor">
+          {isLoading && (
+            <div className="text-primary font-bold w-full h-full flex justify-center items-center">로딩중...</div>
+          )}
+          {error && (
+            <div className="text-primary font-bold w-full h-full flex justify-center items-center">
+              에러가 발생했습니다.
+            </div>
+          )}
+          {eventData && (
+            <TimeSelectTable
+              startingTimes={eventData?.startingTimes?.split(',')?.map(timestamp => Number(timestamp) * 1000) ?? []}
+              timeInterval={eventData?.timeInterval ? eventData.timeInterval * 1000 : undefined}
+              timeSize={eventData?.timeSize ? eventData.timeSize * 1000 : 60 * 60 * 6 * 1000}
+              selectedIds={selectedCells}
+              onSelect={handleCellSelect}
+              onSelectEnd={updateSelectedCells}
+              isResultView={isResultView}
+              resultCellCount={resultCellCount}
+            />
+          )}
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 w-full flex justify-center mb-8">
+        <div className="fixed bottom-6 flex justify-between w-[100%] px-5 md:max-w-sm">
           {isResultView ? (
-            <button onClick={() => setIsResultView(!isResultView)} className="btn w-52">
+            <button onClick={() => setIsResultView(!isResultView)} className="btn w-[100%] bg-white text-cardBg">
               다시 선택하기
             </button>
           ) : (
             <>
-              <button onClick={() => setSelectedCells(new Set<string>([]))} className="btn w-24">
+              <button onClick={deselectAll} className="btn w-[42%] bg-white text-cardBg">
                 초기화
               </button>
-              <button onClick={() => setIsResultView(!isResultView)} className="btn w-48 ml-3">
+              <button
+                onClick={() => setIsResultView(!isResultView)}
+                className="btn w-[54%] bg-gradient-to-r from-from to-to text-white"
+              >
                 결과 보기
               </button>
             </>

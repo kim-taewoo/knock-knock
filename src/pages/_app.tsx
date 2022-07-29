@@ -2,6 +2,7 @@ import { withTRPC } from '@trpc/next'
 import type { AppRouter } from '../server/router'
 import superjson from 'superjson'
 import '../styles/globals.css'
+import '../styles/calendar.css'
 import type { AppProps } from 'next/app'
 import { loggerLink } from '@trpc/client/links/loggerLink'
 import { httpBatchLink } from '@trpc/client/links/httpBatchLink'
@@ -9,6 +10,8 @@ import { getBaseUrl } from '../utils/url'
 import { SessionProvider } from 'next-auth/react'
 import { UserContextProvider } from 'src/context/UserContext'
 import { trpc } from 'src/utils/trpc'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   const { data } = trpc.useQuery(['users.me'])
@@ -21,6 +24,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
             <Component {...pageProps} />
           </main>
         </div>
+        <ToastContainer />
       </UserContextProvider>
     </SessionProvider>
   )
