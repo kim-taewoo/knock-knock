@@ -35,21 +35,28 @@ export default function Event() {
   useEffect(() => {
     const myCells = (myParticipation?.selectedCells ?? '').split(',')
     setSelectedCells(new Set(myCells))
+  }, [myParticipation])
 
+  useEffect(() => {
     const counts = participates.reduce<{ [key: string]: number }>((accu, curr) => {
+      if (curr.profileId === user?.id) return accu
       const selectedCells = (curr?.selectedCells ?? '').split(',')
       selectedCells.forEach(cellId => {
         if (accu[cellId]) {
-          accu[cellId] = accu[cellId]! + 1
+          accu[cellId] += 1
         } else {
           accu[cellId] = 1
         }
       })
       return accu
     }, {})
-
+    const myCells = [...selectedCells]
+    myCells.forEach(cellId => {
+      if (counts[cellId]) counts[cellId] += 1
+      else counts[cellId] = 1
+    })
     setResultCellCount(counts)
-  }, [myParticipation])
+  }, [isResultView])
 
   function updateSelectedCells() {
     if (!query.id || !user?.id) return
@@ -97,19 +104,13 @@ export default function Event() {
           <h3 className="font-bold text-base text-center">어떤 계정으로 로그인 할까요?</h3>
           <div className="flex-col mt-6">
             <button
-              onClick={() => push({ pathname: '/auth/login/anonymous', query: { redirect: query.id } })}
-              className="block mx-auto btn w-full max-w-xs bg-primary text-white"
-            >
-              비회원 로그인
-            </button>
-            <button
-              onClick={() => push({ pathname: '/api/auth/signin' })}
+              onClick={() => push({ pathname: '/api/auth/signin', query: { redirect: query.id } })}
               className="block mx-auto btn w-full max-w-xs mt-2 bg-primary text-white"
             >
               SNS 계정으로 로그인
             </button>
             <button
-              onClick={() => push({ pathname: '/' })}
+              onClick={() => push({ pathname: '/', query: { redirect: query.id } })}
               className="block mx-auto btn w-full max-w-xs mt-2 bg-primary text-white"
             >
               홈으로 가기
@@ -118,7 +119,7 @@ export default function Event() {
         </div>
       </div>
 
-      <div className="flex flex-col pt-9 h-screen relative  bg-bgColor">
+      <div className="flex flex-col pt-9 h-screen relative bg-bgColor">
         <div className="flex justify-between items-center ml-5">
           <Link href="/">
             <img src="/assets/svg/logo.svg" alt="logo" />
