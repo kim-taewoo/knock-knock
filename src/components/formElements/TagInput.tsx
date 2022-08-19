@@ -1,20 +1,22 @@
 import { useState } from 'react'
+import { UseFormRegister } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { CreateEventInput } from 'src/pages/events/create'
 
 interface TagInputProps {
   label: string
-  tags: { id: string; text: string }[]
-  onAddTag: (tag: string) => void
-  onRemoveTag: (index: number) => void
+  tags: { id?: string; text: string }[]
+  onChange: (tags: { id?: string; text: string }[]) => void
   classNames?: string
   [key: string]: any
 }
 
-export default function TagInput({ label, tags, onAddTag, onRemoveTag, classNames, ...rest }: TagInputProps) {
+export default function TagInput({ label, tags, onChange, classNames, ...rest }: TagInputProps) {
   const [inputText, setInputText] = useState('')
 
   return (
     <div className={classNames ?? ''}>
-      <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="tagInput">
+      <label className="mb-1 block text-sm font-medium text-[#F3F4F4] text-left" htmlFor="tagInput">
         {label}
       </label>
       <div className="relative flex justify-between">
@@ -23,24 +25,45 @@ export default function TagInput({ label, tags, onAddTag, onRemoveTag, className
           type="text"
           value={inputText}
           onChange={e => setInputText(e.target.value)}
-          className="appearance-none w-4/5 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 bg-[#2F3035]"
+          className="input w-full bg-[#2F3035] border-none"
           {...rest}
         />
         <button
-          onClick={() => {
+          onClick={e => {
+            e.preventDefault()
+            if (!inputText) return
             setInputText('')
-            onAddTag(inputText)
+            if (tags.findIndex(tag => tag.text === inputText) === -1) {
+              onChange([...tags, { text: inputText }])
+            } else {
+              toast.warn('이미 동일한 태그가 존재합니다.')
+            }
           }}
-          className="w-1/6 border rounded-md border-gray-300 bg-[#5D5E62]"
+          className="w-1/5 text-sm rounded-md bg-[#5D5E62]"
         >
           추가
         </button>
       </div>
       <div className="flex flex-wrap my-3">
         {tags.map((tag, index) => (
-          <button key={tag.id} onClick={() => onRemoveTag(index)} className="bg-[#46474C] px-2 mr-2 mb-2 rounded-md">
+          <div
+            key={tag.text}
+            className="badge bg-[#2F3035] border-none py-4 px-3 text-white gap-2"
+            onClick={() => {
+              const updatedTags = tags.filter((_tag, tagIndex) => index !== tagIndex)
+              onChange(updatedTags)
+            }}
+          >
             {tag.text}
-          </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="inline-block w-4 h-4 stroke-current"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
         ))}
       </div>
     </div>

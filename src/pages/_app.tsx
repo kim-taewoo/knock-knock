@@ -13,9 +13,12 @@ import { UserContextProvider } from 'src/context/UserContext'
 import { trpc } from 'src/utils/trpc'
 import { toast, ToastContainer, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { RecoilRoot } from 'recoil'
+import { useLastPathTracker } from 'src/shared/hooks'
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   const { data } = trpc.useQuery(['users.me'], {})
+  useLastPathTracker()
 
   return (
     <>
@@ -23,21 +26,23 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
         <title>노크노크</title>
         <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
       </Head>
-      <SessionProvider session={session}>
-        <UserContextProvider value={data}>
-          <div className="w-full h-screen bg-slate-100 overflow-auto">
-            <main className="w-full md:max-w-sm h-screen mx-auto bg-bgColor text-white">
-              <Component {...pageProps} />
-            </main>
-          </div>
-          <ToastContainer
-            position={toast.POSITION.TOP_CENTER}
-            autoClose={1000}
-            hideProgressBar={true}
-            transition={Slide}
-          />
-        </UserContextProvider>
-      </SessionProvider>
+      <RecoilRoot>
+        <SessionProvider session={session}>
+          <UserContextProvider value={data}>
+            <div className="w-full h-screen overflow-auto">
+              <main className="w-full md:max-w-sm h-screen mx-auto bg-bgColor text-white">
+                <Component {...pageProps} />
+              </main>
+            </div>
+            <ToastContainer
+              position={toast.POSITION.TOP_CENTER}
+              autoClose={1000}
+              hideProgressBar={true}
+              transition={Slide}
+            />
+          </UserContextProvider>
+        </SessionProvider>
+      </RecoilRoot>
     </>
   )
 }

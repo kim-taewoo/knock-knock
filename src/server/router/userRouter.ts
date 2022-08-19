@@ -1,4 +1,5 @@
 import * as trpc from '@trpc/server'
+import z from 'zod'
 import { createProfileSchema } from '../../schema/userSchema'
 import { createRouter } from './context'
 import { defaultError } from '../shared/errors'
@@ -11,16 +12,50 @@ export const userRouter = createRouter()
     },
   })
   .query('me', {
-    resolve({ ctx }) {
+    async resolve({ ctx }) {
       const session = ctx.session
-      if (!session) return null
-      return ctx.user
+      if (!session?.user?.email) return null
+      try {
+        const user = await ctx.prisma.profile.findFirst({
+          where: {
+            email: session.user.email,
+          },
+          include: {
+            groups: true,
+            events: {
+              include: {
+                participates: {
+                  include: {
+                    profile: true,
+                  },
+                },
+                profile: true,
+              },
+            },
+          },
+        })
+        return user
+      } catch (error) {
+        console.error(error)
+        throw new trpc.TRPCError({
+          code: 'NOT_FOUND',
+          message: 'User not found',
+        })
+      }
     },
   })
   .query('user-list', {
     async resolve({ ctx }) {
       try {
-        const userList = await ctx.prisma.profile.findMany()
+        const userList = await ctx.prisma.profile.findMany({
+          include: {
+            participates: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        })
         return userList
       } catch (error) {
         console.error(error)

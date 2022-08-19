@@ -1,18 +1,18 @@
 import { Participation } from '@prisma/client'
-import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import TimeSelectTable from 'src/components/TimeSelectTable'
-import { useUserContext } from 'src/context/UserContext'
 import { trpc } from 'src/utils/trpc'
 import { toast } from 'react-toastify'
+import { useUser } from 'src/shared/hooks'
+import { signIn } from 'next-auth/react'
+import { cls } from 'src/utils/cls'
+import LoginModal from 'src/components/modals/LoginModal'
 
 export default function Event() {
-  const { status } = useSession()
   const { push, query } = useRouter()
   const { data: eventData, isLoading, error } = trpc.useQuery(['events.single-event', { eventId: query.id as string }])
-  const utils = trpc.useContext()
   const { mutate } = trpc.useMutation('events.my-cells', {
     onSuccess() {
       toast('저장 완료!', { autoClose: 2000 })
@@ -21,7 +21,8 @@ export default function Event() {
       toast('저장 실패...', { autoClose: 2000 })
     },
   })
-  const user = useUserContext()
+  console.log(eventData)
+  const { user, isLoadingUser, isAuthenticated } = useUser()
 
   const participates = eventData?.participates ?? []
   const myParticipation: Participation | undefined = participates.find(
@@ -102,26 +103,7 @@ export default function Event() {
 
   return (
     <>
-      <input checked={status === 'unauthenticated'} readOnly type="checkbox" id="my-modal" className="modal-toggle" />
-      <div className="modal">
-        <div className="modal-box sm:max-w-xs">
-          <h3 className="font-bold text-base text-center">어떤 계정으로 로그인 할까요?</h3>
-          <div className="flex-col mt-6">
-            <button
-              onClick={() => push({ pathname: '/auth/login', query: { redirect: query.id } })}
-              className="block mx-auto btn w-full max-w-xs mt-2 bg-primary text-white"
-            >
-              SNS 계정으로 로그인
-            </button>
-            <button
-              onClick={() => push({ pathname: '/', query: { redirect: query.id } })}
-              className="block mx-auto btn w-full max-w-xs mt-2 bg-primary text-white"
-            >
-              홈으로 가기
-            </button>
-          </div>
-        </div>
-      </div>
+      {!user && <LoginModal />}
 
       <div className="flex flex-col pt-9 h-screen relative bg-bgColor">
         <div className="flex justify-between items-center ml-5">
