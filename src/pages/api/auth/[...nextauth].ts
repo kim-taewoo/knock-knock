@@ -4,6 +4,7 @@ import EmailProvider from 'next-auth/providers/email'
 import KakaoProvider from 'next-auth/providers/kakao'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '../../../server/db/client'
+import { User } from '@prisma/client'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -30,13 +31,33 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    jwt: async ({ token, account }) => {
-      if (account) token.provider = account.provider
-      return token
+    jwt: async ({ token, account, user }) => {
+      let newToken = token
+      if (account) newToken.provider = account.provider
+      if (user) {
+        newToken = {
+          ...newToken,
+          id: user.id,
+          nickname: user.nickname,
+        }
+      }
+      return newToken
     },
     session: async ({ session, token }) => {
-      if (token) session.provider = token.provider
-      return session
+      let newSession = session
+      if (token) {
+        newSession = {
+          ...newSession,
+          provider: token.provider,
+          id: token.id,
+          user: {
+            ...newSession.user,
+            // @ts-ignore
+            nickname: token.nickname,
+          },
+        }
+      }
+      return newSession
     },
     // async redirect(context) {
     //   const { url, baseUrl } = context
