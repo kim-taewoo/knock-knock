@@ -85,3 +85,9 @@ export interface GoogleProfile extends Record<string, any> {
 ```
 
 즉, `profile` 옵션은 원본에서 어떤 것을 무슨 이름으로 가져올 것인지를 정하는 것일 뿐 없는 것을 내가 만들어서 추가할 수는 없다.
+
+### callbacks / jwt, session
+
+- jwt callback 은 jwt 가 생성될 떄나 업데이트될 떄, 즉 signin 이나 오랜만에 들어가서 업데이트될 때 작동한다.
+- session 은 위 jwt token 을 받은 뒤에 실제 client 에서 받는 session 데이터를 채운다.
+- 즉 FE 에서 사용하는 session 의 데이터를 추가하고 싶다면 우선 jwt 콜백 리턴값을 수정한 뒤, 그 값을 또 session 으로 옮겨야 한다.

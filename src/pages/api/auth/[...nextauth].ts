@@ -30,31 +30,22 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    jwt: async ({ token, user }) => {
-      if (user) token.id = user.id
-      console.log(user, 'user')
-      if (user) {
-        const profile = await prisma.user.findFirst({
-          where: {
-            email: user.email,
-          },
-        })
-        console.log(profile, 'profile')
-      }
+    jwt: async ({ token, account }) => {
+      if (account) token.provider = account.provider
       return token
     },
     session: async ({ session, token }) => {
-      if (token) session.id = token.id
+      if (token) session.provider = token.provider
       return session
     },
-    async redirect(context) {
-      const { url, baseUrl } = context
-      // Allows relative callback URLs
-      if (url.startsWith('/')) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
-    },
+    // async redirect(context) {
+    //   const { url, baseUrl } = context
+    //   // Allows relative callback URLs
+    //   if (url.startsWith('/')) return `${baseUrl}${url}`
+    //   // Allows callback URLs on the same origin
+    //   else if (new URL(url).origin === baseUrl) return url
+    //   return baseUrl
+    // },
   },
   // https://next-auth.js.org/configuration/options#nextauth_secret
   // secret: process.env.JWT_SECRET,
