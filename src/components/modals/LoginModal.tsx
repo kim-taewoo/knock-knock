@@ -1,7 +1,7 @@
 import { useCustomRouter, useUser } from 'src/shared/hooks'
 import BackDrop from 'src/components/BackDrop'
 import { useRecoilValue } from 'recoil'
-import { anonymousUserState } from 'src/shared/recoil/user/atoms'
+import { anonymousUserState } from 'src/recoil/user/atoms'
 import { getSession, signIn } from 'next-auth/react'
 import { useEffect } from 'react'
 import { trpc } from 'src/utils/trpc'

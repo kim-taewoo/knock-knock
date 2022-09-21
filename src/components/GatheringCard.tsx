@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import format from 'date-fns/format'
-import { SingleGroupOutput } from 'src/types/group'
+import { SingleGroupOutput } from 'src/shared/types/group'
 import { Event, Participation, Profile } from '@prisma/client'
 import { getCanlendarText, startingTimesToDates } from 'src/utils/time'
 

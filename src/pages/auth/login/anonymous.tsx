@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from 'src/pages/api/auth/[...nextauth]'
 import { useRecoilState } from 'recoil'
-import { anonymousUserState } from 'src/shared/recoil/user/atoms'
+import { anonymousUserState } from 'src/recoil/user/atoms'
 
 type Inputs = {
   name: string

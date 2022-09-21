@@ -63,7 +63,7 @@ model User {
   // sessions      Session[]
 
   // custom fields
-  nickName     String?
+  nickname     String?
   tags         String?
   introduction String?
   events       Event[]

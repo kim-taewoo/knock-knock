@@ -9,7 +9,6 @@ import { useCustomRouter, useUser } from 'src/shared/hooks'
 import MyGroupCard from 'src/components/MyGroupCard'
 import BottomSheet from 'src/components/BottomSheet'
 import GuideModal from 'src/components/modals/GuideModal'
-import { signIn, useSession } from 'next-auth/react'
 import LoginModal from 'src/components/modals/LoginModal'
 // import SkeletonCard from 'src/components/SkeletonCard'
 

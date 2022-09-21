@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
       }
       return newToken
     },
-    session: async ({ session, token }) => {
+    session: async ({ session, token, user }) => {
       let newSession = session
       if (token) {
         newSession = {

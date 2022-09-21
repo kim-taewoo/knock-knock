@@ -6,13 +6,14 @@ import { defaultError } from '../shared/errors'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 
 export const userRouter = createRouter()
-  .query('getSession', {
-    resolve({ ctx }) {
-      return ctx.session
-    },
-  })
+  // .query('getSession', {
+  //   resolve({ ctx }) {
+  //     return ctx.session
+  //   },
+  // })
   .query('me', {
     async resolve({ ctx }) {
+      return
       const session = ctx.session
       if (!session?.user?.email) return null
       try {
