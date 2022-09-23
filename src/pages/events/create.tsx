@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import { trpc } from 'src/utils/trpc'
 import { CreateEventInputSchema } from '../../schema/eventSchema'
 import LoginModal from 'src/components/modals/LoginModal'
-import { useCustomRouter, useUser } from 'src/shared/hooks'
+import { useCustomRouter } from 'src/shared/hooks'
 import TopTitleBottomBtnLayout from 'src/components/pageLayouts/TopTitleBottomBtnLayout'
 import { cls } from 'src/utils/cls'
 import { getCanlendarText } from 'src/utils/time'
@@ -22,7 +22,6 @@ export interface CreateEventInput {
 
 function Create() {
   const router = useCustomRouter()
-  const { isAuthenticated, user } = useUser()
 
   const [createPhase, setCreatePhase] = useState(1)
   const [isLoginModalShown, setIsLoginModalShown] = useState(false)
@@ -337,4 +336,5 @@ function Create() {
   )
 }
 
+Create.auth = true
 export default Create

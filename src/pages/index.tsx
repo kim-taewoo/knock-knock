@@ -5,7 +5,7 @@ import { toast } from 'react-toastify'
 import GatheringCard from 'src/components/GatheringCard'
 import SEO from 'src/components/pageLayouts/SEO'
 import { trpc } from 'src/utils/trpc'
-import { useCustomRouter, useUser } from 'src/shared/hooks'
+import { useCustomRouter, useSession } from 'src/shared/hooks'
 import MyGroupCard from 'src/components/MyGroupCard'
 import BottomSheet from 'src/components/BottomSheet'
 import GuideModal from 'src/components/modals/GuideModal'
@@ -14,7 +14,7 @@ import LoginModal from 'src/components/modals/LoginModal'
 
 export default function Home() {
   const utils = trpc.useContext()
-  const { user, isAuthenticated } = useUser()
+  const [user] = useSession()
   const { data: me } = trpc.useQuery(['users.me'])
   const router = useCustomRouter()
   const [visibleCreateModal, setVisibleCreateModal] = useState(false)
@@ -46,7 +46,7 @@ export default function Home() {
 
   const onLeaveEvent = (eventId: string) => {
     if (!user?.id) return
-    leaveEventMutation.mutate({ eventId: eventId, profileId: user.id, cells: '' })
+    leaveEventMutation.mutate({ eventId: eventId, userId: user.id, cells: '' })
     setVisibleMoreButtonModal(null)
   }
 
@@ -71,8 +71,8 @@ export default function Home() {
           <div className="w-full md:max-w-sm fixed flex justify-between items-center px-5 pt-5 z-10">
             <object data="/assets/svg/logo_white.svg" />
             <div className="flex items-center">
-              {isAuthenticated ? (
-                <Link href={{ pathname: '/profiles/[id]', query: { id: me?.id } }}>
+              {user ? (
+                <Link href={{ pathname: '/users/[id]', query: { id: me?.id } }}>
                   <div className="cursor-pointer w-[24px] h-[24px] rounded-[24px] overflow-hidden object-cover mr-3">
                     <img className="" src={`${user?.image}` ?? '/assets/images/avatar.png'} />
                   </div>
@@ -144,7 +144,7 @@ export default function Home() {
               ) : (
                 <div className="w-full bg-cardBg p-3 rounded-lg mt-2">
                   <span className="text-textGray font-bold">
-                    {isAuthenticated ? '새로운 그룹을 만들어보세요' : '로그인 후 이용가능 합니다'}
+                    {user ? '새로운 그룹을 만들어보세요' : '로그인 후 이용가능 합니다'}
                   </span>
                 </div>
               )}
@@ -188,7 +188,7 @@ export default function Home() {
 
           {visibleMoreButtonModal && (
             <BottomSheet onClose={() => setVisibleMoreButtonModal(null)} isBackground={false}>
-              {user?.events.some(value => value.profileId === visibleMoreButtonModal.profileId) && (
+              {me?.events.some(value => value.userId === visibleMoreButtonModal.userId) && (
                 <>
                   <Link href={`/events/edit/${visibleMoreButtonModal}`}>
                     <a className="btn w-full md:max-w-sm bg-primary">

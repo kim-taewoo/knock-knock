@@ -63,44 +63,35 @@ model User {
   // sessions      Session[]
 
   // custom fields
+  // 닉네임
   nickname     String?
+  // 나를 표현하는 태그들
   tags         String?
+  urls         String?
+  // 자기 소개
   introduction String?
+  // 내가 만든 이벤트들(이벤트장)
   events       Event[]
+  // 참여한 이벤트
   participates Participation[]
+  // 어떤 그룹의 멤버
   members      Member[]
+  // 내가 만든 그룹들(그룹장)
   groups       Group[]
-}
-
-model Profile {
-  id            String          @id @default(cuid())
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  oauthId       String?
-  name          String
-  email         String          @unique
-  emailVerified DateTime?
-  image         String?
-  tags          String?
-  introduction  String?
-  events        Event[]
-  participates  Participation[]
-  members       Member[]
-  groups        Group[]
 }
 
 model Group {
   id          String   @id @default(cuid())
   password    Int?
+  type        String   @default("normal")
   name        String
   description String
   tags        String?
   events      Event[]
   isPublic    Boolean?
   members     Member[]
-  profile     Profile? @relation(fields: [profileId], references: [id])
-  profileId   String?
-  User        User?    @relation(fields: [userId], references: [id])
+  // 그룹장
+  user        User?    @relation(fields: [userId], references: [id])
   userId      String?
 }
 
@@ -108,26 +99,22 @@ model Member {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  profileId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
   group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId   String
   isHost    Boolean  @default(false)
-  User      User?    @relation(fields: [userId], references: [id])
-  userId    String?
 }
 
 model Participation {
   id            String   @id @default(cuid())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  profileId     String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
   event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId       String
   selectedCells String   @db.Text
-  User          User?    @relation(fields: [userId], references: [id])
-  userId        String?
 }
 
 model AnonymousParticipation {
@@ -145,8 +132,8 @@ model Event {
   id                    String                   @id @default(cuid())
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
-  profile               Profile                  @relation(fields: [profileId], references: [id])
-  profileId             String
+  user                  User                     @relation(fields: [userId], references: [id])
+  userId                String
   participates          Participation[]
   anonymousParticipates AnonymousParticipation[]
   title                 String
@@ -161,6 +148,4 @@ model Event {
   group                 Group?                   @relation(fields: [groupId], references: [id])
   groupId               String?
   result                String?
-  User                  User?                    @relation(fields: [userId], references: [id])
-  userId                String?
 }

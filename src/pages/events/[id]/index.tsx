@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import TimeSelectTable from 'src/components/TimeSelectTable'
 import { trpc } from 'src/utils/trpc'
 import { toast } from 'react-toastify'
-import { useCustomRouter, useUser } from 'src/shared/hooks'
+import { useCustomRouter } from 'src/shared/hooks'
 import LoginModal from 'src/components/modals/LoginModal'
 import TopTitleBottomBtnLayout from 'src/components/pageLayouts/TopTitleBottomBtnLayout'
 import ConfirmModal from 'src/components/modals/ConfirmModal'
@@ -32,22 +32,18 @@ export default function Event() {
 
   async function updateSelectedCells() {
     if (!router.query.id || !user?.id) return
-    await mutate({ eventId: router.query.id as string, profileId: user.id, cells: [...selectedCells].join(',') })
+    await mutate({ eventId: router.query.id as string, userId: user.id, cells: [...selectedCells].join(',') })
     router.push({ pathname: '/events/[id]/completed', query: { id: router.query.id } })
   }
 
   async function updateResultCells() {
     if (!router.query.id || !user?.id) return
-    // await mutate({ eventId: router.query.id as string, profileId: user.id, cells: [...selectedCells].join(',') })
+    // await mutate({ eventId: router.query.id as string, userId: user.id, cells: [...selectedCells].join(',') })
     router.push({ pathname: '/events/[id]/result', query: { id: router.query.id } })
   }
 
-  const { user, isLoadingUser, isAuthenticated } = useUser()
-
   const participates = eventData?.participates ?? []
-  const myParticipation: Participation | undefined = participates.find(
-    participate => participate.profileId === user?.id,
-  )
+  const myParticipation: Participation | undefined = participates.find(participate => participate.userId === user?.id)
 
   const [selectedCells, setSelectedCells] = useState(new Set<string>())
   const [allSelectedCells, setAllSelectedCells] = useState<{ [key: string]: Set<string> }>({})
@@ -71,7 +67,7 @@ export default function Event() {
     setIsHostView(false)
   }, [router.query.view, eventData])
 
-  const isHost = eventData && eventData.profileId === user?.id
+  const isHost = eventData && eventData.userId === user?.id
 
   useEffect(() => {
     const myCells = (myParticipation?.selectedCells ?? '').split(',')
@@ -81,9 +77,9 @@ export default function Event() {
   useEffect(() => {
     if (!eventData || !router.query.id) return
     const counts = participates.reduce<{ [key: string]: number }>((accu, curr) => {
-      if (curr.profileId === user?.id) return accu
+      if (curr.userId === user?.id) return accu
       const selectedCells = (curr?.selectedCells ?? '').split(',')
-      setAllSelectedCells(prev => ({ ...prev, [curr.profile.name]: new Set(selectedCells) }))
+      setAllSelectedCells(prev => ({ ...prev, [curr.user.name]: new Set(selectedCells) }))
       selectedCells.forEach(cellId => {
         if (accu[cellId]) {
           accu[cellId] += 1

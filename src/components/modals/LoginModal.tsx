@@ -1,4 +1,4 @@
-import { useCustomRouter, useUser } from 'src/shared/hooks'
+import { useCustomRouter } from 'src/shared/hooks'
 import BackDrop from 'src/components/BackDrop'
 import { useRecoilValue } from 'recoil'
 import { anonymousUserState } from 'src/recoil/user/atoms'
@@ -7,7 +7,6 @@ import { useEffect } from 'react'
 import { trpc } from 'src/utils/trpc'
 
 export default function LoginModal({ fallbackUrl, redirectUrl }: { fallbackUrl?: string; redirectUrl: string }) {
-  const { isAuthenticated } = useUser()
   const router = useCustomRouter()
   const anonymous = useRecoilValue(anonymousUserState)
   const { data: me } = trpc.useQuery(['users.me'])
@@ -16,7 +15,7 @@ export default function LoginModal({ fallbackUrl, redirectUrl }: { fallbackUrl?:
   }
 
   if (me?.id) router.replace(redirectUrl ?? (router.query.redirect as string) ?? '/')
-  if (isAuthenticated || anonymous?.name) return null
+  if (anonymous?.name) return null
   useEffect(() => {
     async function checkIsNewUser() {
       const session = await getSession()

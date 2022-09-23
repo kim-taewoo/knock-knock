@@ -1,5 +1,4 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react'
-import { useSession } from 'next-auth/react'
 import format from 'date-fns/format'
 import { toast } from 'react-toastify'
 
@@ -7,14 +6,12 @@ import TagInput from '../../../components/formElements/TagInput'
 import Calendar from 'src/components/Calendar'
 import { trpc } from 'src/utils/trpc'
 import { IEditEvent } from '../../../schema/eventSchema'
-import { useCustomRouter, useUser } from 'src/shared/hooks'
+import { useCustomRouter } from 'src/shared/hooks'
 import TitleHeader from 'src/components/TitleHeader'
 
 // TODO: 필수, 선택에 따른 유효성 검사
 function Edit() {
   const router = useCustomRouter()
-  const { status } = useSession()
-  const { user, isAuthenticated } = useUser()
   const { data: eventData } = trpc.useQuery(['events.single-event', { eventId: router.query.id as string }])
 
   const [editPhase, setEditPhase] = useState(1)

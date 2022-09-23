@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 import { trpc } from 'src/utils/trpc'
-import { useUser } from 'src/shared/hooks'
 import SEO from 'src/components/pageLayouts/SEO'
 import BottomSheet from 'src/components/BottomSheet'
 import GatheringCard from 'src/components/GatheringCard'
@@ -12,8 +11,6 @@ import { toast } from 'react-toastify'
 export default function GroupDetail() {
   const [visibleBottomSheet, setVisibleBottomSheet] = useState<'create' | null>(null)
   const [visibleMoreButtonModal, setVisibleMoreButtonModal] = useState<any | null>(null)
-
-  const { user, isAuthenticated } = useUser()
   const router = useRouter()
   const {
     data: groupData,
@@ -55,7 +52,7 @@ export default function GroupDetail() {
     if (!groupData?.id || !user?.id) return
     joinGroupMutation.mutate({
       groupId: groupData.id,
-      profileId: user.id,
+      userId: user.id,
       isHost: false,
     })
   }
@@ -67,7 +64,7 @@ export default function GroupDetail() {
 
   const onLeaveEvent = (eventId: string) => {
     if (!user?.id) return
-    leaveEventMutation.mutate({ eventId: eventId, profileId: user.id, cells: '' })
+    leaveEventMutation.mutate({ eventId: eventId, userId: user.id, cells: '' })
     setVisibleMoreButtonModal(null)
   }
 
@@ -102,7 +99,7 @@ export default function GroupDetail() {
               <span className="font-bold text-xl">{groupData?.name}</span>
               <span className="font-semibold text-sm">{groupData?.description}</span>
             </div>
-            {groupData?.profileId === user?.id && (
+            {groupData?.userId === user?.id && (
               <div
                 className="flex items-center"
                 onClick={() => router.push({ pathname: '/groups/modify', query: { id: `${router.query.id}` } })}
@@ -165,7 +162,7 @@ export default function GroupDetail() {
         )}
         {visibleMoreButtonModal && (
           <BottomSheet onClose={() => setVisibleMoreButtonModal(null)} isBackground={false}>
-            {user?.events.some(value => value.profileId === visibleMoreButtonModal.profileId) && (
+            {user?.events.some(value => value.userId === visibleMoreButtonModal.userId) && (
               <>
                 <Link href={`/events/edit/${visibleMoreButtonModal}`}>
                   <a className="btn w-full md:max-w-sm bg-primary">

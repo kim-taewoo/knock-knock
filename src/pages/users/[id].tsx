@@ -1,17 +1,13 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useUser } from 'src/shared/hooks'
+import { useSession } from 'src/shared/hooks'
 
-export default function Profile() {
-  const { user, isAuthenticated, isLoadingUser } = useUser()
+export default function User() {
   const router = useRouter()
+  const [user] = useSession()
 
-  useEffect(() => {
-    if (!isLoadingUser && !isAuthenticated) {
-      router.push('/')
-    }
-  }, [])
+  const displayedName = user?.nickname ?? user?.name
 
   return (
     <div className="flex flex-col py-5 pt-2 relative bg-bgColor w-full md:max-w-sm">

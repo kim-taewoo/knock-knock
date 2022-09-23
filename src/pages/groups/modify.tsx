@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
 import { useForm, useFieldArray, SubmitHandler } from 'react-hook-form'
 import { trpc } from 'src/utils/trpc'
 import CenteringLayout from 'src/components/pageLayouts/CenteringLayout'
@@ -12,7 +11,6 @@ import TitleHeader from 'src/components/TitleHeader'
 function ModifyGroup() {
   const router = useCustomRouter()
   const { handleSubmit, register, reset } = useForm<ICreateGroup>()
-  const { data: session } = useSession()
   const [tags, setTags] = useState<{ text: string }[]>([])
   const {
     data: groupData,

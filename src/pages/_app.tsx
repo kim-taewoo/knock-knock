@@ -8,13 +8,12 @@ import type { AppProps } from 'next/app'
 // import { loggerLink } from '@trpc/client/links/loggerLink'
 import { httpBatchLink } from '@trpc/client/links/httpBatchLink'
 import { getBaseUrl } from '../utils/url'
-import { SessionProvider } from 'next-auth/react'
 import { toast, ToastContainer, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { RecoilRoot } from 'recoil'
 import { useLastPathTracker } from 'src/shared/hooks'
-import { Auth } from 'src/components/auth'
 import type { NextPage } from 'next'
+import { Auth } from 'src/components/auth'
 import ConditionalWrapper from 'src/components/ConditionalWrapper'
 
 type NextPageWithAuth<P = {}, IP = P> = NextPage<P, IP> & { auth?: boolean }
@@ -33,26 +32,25 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: MyAppProps) 
         <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
       </Head>
       <RecoilRoot>
-        <SessionProvider session={session}>
-          <ConditionalWrapper condition={!!Component.auth} wrapper={children => <Auth>{children}</Auth>}>
-            <div className="w-full min-h-screen">
-              <main className="w-full md:max-w-sm min-h-screen mx-auto bg-bgColor text-white">
-                <Component {...pageProps} />
-              </main>
-            </div>
-          </ConditionalWrapper>
-          <ToastContainer
-            position={toast.POSITION.TOP_CENTER}
-            autoClose={1000}
-            hideProgressBar={true}
-            transition={Slide}
-          />
-        </SessionProvider>
+        <ConditionalWrapper condition={!!Component.auth} wrapper={children => <Auth>{children}</Auth>}>
+          <div className="w-full min-h-screen">
+            <main className="w-full min-h-screen md:max-w-sm mx-auto bg-bgColor text-white">
+              <Component {...pageProps} />
+            </main>
+          </div>
+        </ConditionalWrapper>
+        <ToastContainer
+          position={toast.POSITION.TOP_CENTER}
+          autoClose={1000}
+          hideProgressBar={true}
+          transition={Slide}
+        />
       </RecoilRoot>
     </>
   )
 }
 
+// withTRPC 에 react-query 의 QueryClient 포함되어 있음
 export default withTRPC<AppRouter>({
   config({ ctx }) {
     const url = `${getBaseUrl()}/api/trpc`
@@ -69,7 +67,9 @@ export default withTRPC<AppRouter>({
       queryClientConfig: {
         defaultOptions: {
           queries: {
-            staleTime: 60,
+            staleTime: 60 * 1000 * 60 * 3, // 3 hours
+            refetchInterval: 60 * 1000 * 5, // 5 minutes
+            refetchOnWindowFocus: false,
           },
         },
       },

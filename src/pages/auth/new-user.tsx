@@ -1,10 +1,9 @@
 import { ErrorMessage } from '@hookform/error-message'
-import { unstable_getServerSession } from 'next-auth'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { ICreateProfile } from 'src/schema/userSchema'
+import { ICreateuser } from 'src/schema/userSchema'
+import { useSession } from 'src/shared/hooks'
 import { trpc } from 'src/utils/trpc'
 import { authOptions } from '../api/auth/[...nextauth]'
 
@@ -13,22 +12,22 @@ export default function NewUser() {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<ICreateProfile>()
+  } = useForm<ICreateuser>()
   const router = useRouter()
   const { data: me } = trpc.useQuery(['users.me'])
   const utils = trpc.useContext()
 
-  const { mutate, error } = trpc.useMutation('users.create-profile', {
+  const { mutate, error } = trpc.useMutation('users.create-user', {
     onSuccess: async () => {
       await utils.invalidateQueries(['users.me'])
       router.replace((router.query.redirect as string) ?? '/')
     },
   })
-  const { data: session } = useSession()
+  const [session] = useSession()
 
   if (me?.id) router.replace((router.query.redirect as string) ?? '/')
 
-  const onValid: SubmitHandler<ICreateProfile> = async (formValues: ICreateProfile) => {
+  const onValid: SubmitHandler<ICreateuser> = async (formValues: ICreateuser) => {
     if (!session?.user) {
       toast.warn('문제가 발생했습니다. knockknock.me@gmail.com 으로 문의부탁드립니다.')
       return

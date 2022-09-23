@@ -31,12 +31,12 @@ export const groupRouter = createRouter()
           include: {
             members: {
               include: {
-                profile: true,
+                user: true,
               },
             },
-            profile: true,
+            user: true,
             events: {
-              include: { participates: { include: { profile: true } } },
+              include: { participates: { include: { user: true } } },
             },
           },
         })
@@ -59,7 +59,7 @@ export const groupRouter = createRouter()
       try {
         const event = await ctx.prisma.group.create({
           data: {
-            profile: {
+            user: {
               connect: {
                 email: ctx.session?.user?.email!,
               },
@@ -88,7 +88,7 @@ export const groupRouter = createRouter()
       try {
         const event = await ctx.prisma.member.create({
           data: {
-            profile: {
+            user: {
               connect: {
                 email: ctx.session?.user?.email!,
               },
@@ -130,12 +130,12 @@ export const groupRouter = createRouter()
     },
   })
   .mutation('join-group', {
-    input: z.object({ groupId: z.string(), profileId: z.string(), isHost: z.boolean() }),
+    input: z.object({ groupId: z.string(), userId: z.string(), isHost: z.boolean() }),
     async resolve({ ctx, input }) {
       const alreadyExists = await ctx.prisma.member.findFirst({
         where: {
           groupId: input.groupId,
-          profileId: input.profileId,
+          userId: input.userId,
         },
       })
       if (alreadyExists) {
@@ -155,9 +155,9 @@ export const groupRouter = createRouter()
                 id: input.groupId,
               },
             },
-            profile: {
+            user: {
               connect: {
-                id: input.profileId,
+                id: input.userId,
               },
             },
             isHost: input.isHost,

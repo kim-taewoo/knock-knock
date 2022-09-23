@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { Profile, Event, Participation, Group } from '@prisma/client'
+import { user, Event, Participation, Group } from '@prisma/client'
 import { trpc } from 'src/utils/trpc'
 
 interface Events extends Event {
@@ -15,7 +15,7 @@ export default function SearchPage() {
   const { data: events, isLoading, error } = trpc.useQuery(['events.events'])
 
   const [keyword, setKeyword] = useState('')
-  const [searchedUserList, setSearchedUserList] = useState<Partial<Profile>[]>([])
+  const [searchedUserList, setSearchedUserList] = useState<Partial<user>[]>([])
   const [searchedEventList, setSearchedEventList] = useState<Partial<Events>[]>([])
   const [searchedGroupList, setSearchedGroupList] = useState<Partial<Group>[]>([])
 
@@ -61,7 +61,7 @@ export default function SearchPage() {
                       <img
                         className="w-[30px] h-[30px] rounded-full"
                         src={user.image || '/assets/svg/logo.svg'}
-                        alt="profile"
+                        alt="user"
                       />
                       <span className="text-sm ml-2 text-textGray">{user.name}</span>
                     </div>
@@ -79,7 +79,7 @@ export default function SearchPage() {
                 return (
                   <div className="flex items-center justify-between">
                     <div className="my-3 flex items-center">
-                      <img className="w-[30px] h-[30px] rounded-full" src="/assets/svg/logo.svg" alt="profile" />
+                      <img className="w-[30px] h-[30px] rounded-full" src="/assets/svg/logo.svg" alt="user" />
                       <span className="text-sm ml-2 text-textGray">{event.title}</span>
                     </div>
                     {event?.participates && (
@@ -99,7 +99,7 @@ export default function SearchPage() {
                 return (
                   <div className="flex items-center justify-between" onClick={() => router.push(`/groups/${group.id}`)}>
                     <div className="my-3 flex items-center">
-                      <img className="w-[30px] h-[30px] rounded-full" src="/assets/svg/logo.svg" alt="profile" />
+                      <img className="w-[30px] h-[30px] rounded-full" src="/assets/svg/logo.svg" alt="user" />
                       <span className="text-sm ml-2 text-textGray">{group.name}</span>
                     </div>
                   </div>

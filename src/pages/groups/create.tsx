@@ -1,4 +1,3 @@
-import { useSession } from 'next-auth/react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { trpc } from 'src/utils/trpc'
 import CenteringLayout from 'src/components/pageLayouts/CenteringLayout'
@@ -12,7 +11,6 @@ import { useState } from 'react'
 function CreateGroup() {
   const router = useCustomRouter()
   const { handleSubmit, register } = useForm<ICreateGroup>()
-  const { data: session } = useSession()
   const [tags, setTags] = useState<{ text: string }[]>([])
 
   const { mutate } = trpc.useMutation('groups.create-group', {
@@ -30,7 +28,6 @@ function CreateGroup() {
 
   const onValid: SubmitHandler<ICreateGroup> = async (formValues: ICreateGroup) => {
     console.log(formValues)
-    if (!session?.user) return
     if (!formValues.name) return
     if (!formValues.description) return
 

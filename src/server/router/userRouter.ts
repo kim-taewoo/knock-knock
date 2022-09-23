@@ -1,25 +1,24 @@
 import * as trpc from '@trpc/server'
 import z from 'zod'
-import { createProfileSchema } from '../../schema/userSchema'
+import { createuserSchema } from '../../schema/userSchema'
 import { createRouter } from './context'
 import { defaultError } from '../shared/errors'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 
 export const userRouter = createRouter()
-  // .query('getSession', {
-  //   resolve({ ctx }) {
-  //     return ctx.session
-  //   },
-  // })
+  .query('getSession', {
+    resolve({ ctx }) {
+      return ctx.session
+    },
+  })
   .query('me', {
     async resolve({ ctx }) {
-      return
       const session = ctx.session
-      if (!session?.user?.email) return null
+      if (!session) return null
       try {
-        const user = await ctx.prisma.profile.findFirst({
+        const user = await ctx.prisma.user.findFirst({
           where: {
-            email: session.user.email,
+            id: session.id as string,
           },
           include: {
             groups: { include: { members: true } },
@@ -27,10 +26,10 @@ export const userRouter = createRouter()
               include: {
                 participates: {
                   include: {
-                    profile: true,
+                    user: true,
                   },
                 },
-                profile: true,
+                user: true,
               },
             },
           },
@@ -48,11 +47,11 @@ export const userRouter = createRouter()
   .query('user-list', {
     async resolve({ ctx }) {
       try {
-        const userList = await ctx.prisma.profile.findMany({
+        const userList = await ctx.prisma.user.findMany({
           include: {
             participates: {
               include: {
-                profile: true,
+                user: true,
               },
             },
           },
@@ -64,20 +63,20 @@ export const userRouter = createRouter()
       }
     },
   })
-  .mutation('create-profile', {
-    input: createProfileSchema,
+  .mutation('create-user', {
+    input: createuserSchema,
     async resolve({ ctx, input }) {
       try {
-        const profile = await ctx.prisma.profile.create({
+        const user = await ctx.prisma.user.create({
           data: input,
         })
-        return profile
+        return user
       } catch (e) {
         if (e instanceof PrismaClientKnownRequestError) {
           if (e.code === 'P2002') {
             throw new trpc.TRPCError({
               code: 'CONFLICT',
-              message: 'Profile already exists',
+              message: 'user already exists',
             })
           }
         }

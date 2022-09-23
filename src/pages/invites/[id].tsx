@@ -2,7 +2,7 @@ import { FormEvent, useState } from 'react'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { trpc } from 'src/utils/trpc'
-import { useCustomRouter, useUser } from 'src/shared/hooks'
+import { useCustomRouter } from 'src/shared/hooks'
 import TopTitleBottomBtnLayout from 'src/components/pageLayouts/TopTitleBottomBtnLayout'
 import Calendar from 'src/components/Calendar'
 import { getCanlendarText, getFormattedTimeString, setZeroHoursMinutes, startingTimesToDates } from 'src/utils/time'
@@ -105,8 +105,8 @@ export default function Invite() {
                 {eventData?.participates?.map(participate => {
                   return (
                     <div key={participate.id} className="badge badge-lg shrink-0 text-white mr-2 mb-2 py-4 text-sm">
-                      <img className="w-6 rounded-lg mr-2" src={participate.profile.image || ''} />
-                      {participate.profile.name}
+                      <img className="w-6 rounded-lg mr-2" src={participate.user.image || ''} />
+                      {participate.user.name}
                     </div>
                   )
                 })}

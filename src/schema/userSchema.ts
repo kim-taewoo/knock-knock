@@ -1,6 +1,6 @@
 import z from 'zod'
 
-export const createProfileSchema = z.object({
+export const createuserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
   oauthId: z.string().optional(),
@@ -10,4 +10,4 @@ export const createProfileSchema = z.object({
   introduction: z.string().optional(),
 })
 
-export type ICreateProfile = z.TypeOf<typeof createProfileSchema>
+export type ICreateuser = z.TypeOf<typeof createuserSchema>

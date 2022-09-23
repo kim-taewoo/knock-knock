@@ -14,7 +14,7 @@ export const eventRouter = createRouter()
           include: {
             participates: {
               include: {
-                profile: true,
+                user: true,
               },
             },
           },
@@ -37,10 +37,10 @@ export const eventRouter = createRouter()
           include: {
             participates: {
               include: {
-                profile: true,
+                user: true,
               },
             },
-            profile: true,
+            user: true,
           },
         })
         return event
@@ -51,12 +51,12 @@ export const eventRouter = createRouter()
     },
   })
   .mutation('my-cells', {
-    input: z.object({ eventId: z.string(), profileId: z.string(), cells: z.string() }),
+    input: z.object({ eventId: z.string(), userId: z.string(), cells: z.string() }),
     async resolve({ ctx, input }) {
       const alreadyExists = await ctx.prisma.participation.findFirst({
         where: {
           eventId: input.eventId,
-          profileId: input.profileId,
+          userId: input.userId,
         },
       })
       if (alreadyExists) {
@@ -79,9 +79,9 @@ export const eventRouter = createRouter()
       } else {
         await ctx.prisma.participation.create({
           data: {
-            profile: {
+            user: {
               connect: {
-                id: input.profileId,
+                id: input.userId,
               },
             },
             event: {
@@ -109,7 +109,7 @@ export const eventRouter = createRouter()
       try {
         const event = await ctx.prisma.event.create({
           data: {
-            profile: {
+            user: {
               connect: {
                 email: ctx.session?.user?.email!,
               },
@@ -138,7 +138,7 @@ export const eventRouter = createRouter()
           if (e.code === 'P2002') {
             throw new trpc.TRPCError({
               code: 'CONFLICT',
-              message: 'Profile already exists',
+              message: 'user already exists',
             })
           }
         }
@@ -165,7 +165,7 @@ export const eventRouter = createRouter()
           if (e.code === 'P2002') {
             throw new trpc.TRPCError({
               code: 'CONFLICT',
-              message: 'Profile already exists',
+              message: 'user already exists',
             })
           }
         }
@@ -189,7 +189,7 @@ export const eventRouter = createRouter()
           if (e.code === 'P2002') {
             throw new trpc.TRPCError({
               code: 'CONFLICT',
-              message: 'Profile already exists',
+              message: 'user already exists',
             })
           }
         }

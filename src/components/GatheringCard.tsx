@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import format from 'date-fns/format'
 import { SingleGroupOutput } from 'src/shared/types/group'
-import { Event, Participation, Profile } from '@prisma/client'
+import { Event, Participation, user } from '@prisma/client'
 import { getCanlendarText, startingTimesToDates } from 'src/utils/time'
 
 type GatheringCardProps = {
   group?: SingleGroupOutput
-  event: Event & { participates?: (Participation & { profile?: Profile })[] }
+  event: Event & { participates?: (Participation & { user?: user })[] }
   isWideView?: boolean
   onMoreButtonClick?: () => void
 }
@@ -57,7 +57,7 @@ const GatheringCard = ({ event, group, isWideView, onMoreButtonClick }: Gatherin
                   <div className="avatar flex">
                     {(event?.participates?.slice(0, 2) ?? []).map(participate => (
                       <div key={participate.id} className="w-7 h-7 rounded-full overflow-hidden mr-1">
-                        <img src={participate?.profile?.image ?? `/assets/images/avatar.png`} />
+                        <img src={participate?.user?.image ?? `/assets/images/avatar.png`} />
                       </div>
                     ))}
                     {(event?.participates?.length ?? 0) > 3 && (
