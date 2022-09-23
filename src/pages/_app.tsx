@@ -15,6 +15,7 @@ import { RecoilRoot } from 'recoil'
 import { useLastPathTracker } from 'src/shared/hooks'
 import { Auth } from 'src/components/auth'
 import type { NextPage } from 'next'
+import ConditionalWrapper from 'src/components/ConditionalWrapper'
 
 type NextPageWithAuth<P = {}, IP = P> = NextPage<P, IP> & { auth?: boolean }
 
@@ -33,22 +34,13 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: MyAppProps) 
       </Head>
       <RecoilRoot>
         <SessionProvider session={session}>
-          {Component.auth ? (
-            <Auth>
-              <div className="w-full min-h-screen">
-                <main className="w-full md:max-w-sm min-h-screen mx-auto bg-bgColor text-white">
-                  <Component {...pageProps} />
-                </main>
-              </div>
-            </Auth>
-          ) : (
+          <ConditionalWrapper condition={!!Component.auth} wrapper={children => <Auth>{children}</Auth>}>
             <div className="w-full min-h-screen">
               <main className="w-full md:max-w-sm min-h-screen mx-auto bg-bgColor text-white">
                 <Component {...pageProps} />
               </main>
             </div>
-          )}
-
+          </ConditionalWrapper>
           <ToastContainer
             position={toast.POSITION.TOP_CENTER}
             autoClose={1000}
