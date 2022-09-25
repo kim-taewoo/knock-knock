@@ -78,6 +78,18 @@ model User {
   members      Member[]
   // 내가 만든 그룹들(그룹장)
   groups       Group[]
+  // 유저 팔로우
+  followers    Follows[]       @relation("following")
+  following    Follows[]       @relation("follower")
+}
+
+model Follows {
+  follower    User   @relation("follower", fields: [followerId], references: [id])
+  followerId  String
+  following   User   @relation("following", fields: [followingId], references: [id])
+  followingId String
+
+  @@id([followerId, followingId])
 }
 
 model Group {
