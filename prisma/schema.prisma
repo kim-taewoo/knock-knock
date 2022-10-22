@@ -92,6 +92,14 @@ model Follows {
   @@id([followerId, followingId])
 }
 
+model UserRelationship {
+  userFirstId  String
+  userSecondId String
+  type         String
+
+  @@id([userFirstId, userSecondId])
+}
+
 model Group {
   id          String   @id @default(cuid())
   password    Int?
@@ -108,7 +116,6 @@ model Group {
 }
 
 model Member {
-  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -116,6 +123,8 @@ model Member {
   group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId   String
   isHost    Boolean  @default(false)
+
+  @@id([userId, groupId])
 }
 
 model Participation {
